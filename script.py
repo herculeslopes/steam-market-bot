@@ -7,17 +7,46 @@ system('color')
 skin_name = input('Enter a skin: \033[36m')
 print('\033[m', end='')
 
-url = f'https://steamcommunity.com/market/search?q={"+".join(skin_name.split())}#p1_price_asc'
-print(f'Steam url: {url}')
-
 print()
 
+print(f''' Quality preferences:
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+| No preference:  | 0 |
+| Battle-Scared:  | 1 |
+| Well-Worn:      | 2 |
+| Field-Tested:   | 3 |
+| Minimal Wear:   | 4 | 
+| Factory New:    | 5 |
+▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+''')
+
+quality = input('Quality preference: ')
+
+if quality == '0':
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}#p1_price_asc'
+elif quality == '1':
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}+battle-scared#p1_price_asc'
+elif quality == '2':
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}+well-worn#p1_price_asc'
+elif quality == '3':
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}+field-tested#p1_price_asc'
+elif quality == '4':
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}+minimal+wear#p1_price_asc'
+elif quality == '5':
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}+factory-new#p1_price_asc'
+else:
+    print('Invalid option')
+    print('Going with no preference')
+    url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}#p1_price_asc'
+
+print(f'Steam url: {url}')
 
 try:
     mkdir('price_log')
     print('Folder /price_log created')
 except FileExistsError:
     print('Folder log: /price_log')
+print()
 
 searches = 0
 while True:
@@ -25,7 +54,6 @@ while True:
         print('\033[33m')
         for i in range(0, 10):
             print(f'{i + 1} ', end='', flush=True)
-            # print('█', end='', flush=True)
             sleep(2)
         print('\033[m\n')
 

@@ -1,6 +1,9 @@
 import requests, bs4
 from os import system, mkdir
+from win10toast import ToastNotifier
 from time import sleep
+
+toaster = ToastNotifier()
 
 system('color')
 
@@ -21,6 +24,7 @@ print(f''' Quality preferences:
 ''')
 
 quality = input('Quality preference: ')
+notification_price = float(input('Notify on: $'))
 
 if quality == '0':
     url = f'https://steamcommunity.com/market/search?appid=730&q={"+".join(skin_name.split())}#p1_price_asc'
@@ -46,20 +50,25 @@ try:
     print('Folder /price_log created')
 except FileExistsError:
     print('Folder log: /price_log')
+
 print()
 
 searches = 0
 while True:
     if searches != 0:
-        print('\033[33m')
-        for i in range(0, 10):
+        print()
+        print('20sec Timeout: \033[33m', end='')
+        for i in range(0, 20):
             print(f'{i + 1} ', end='', flush=True)
-            sleep(2)
+            sleep(1)
         print('\033[m\n')
 
     res_obj = requests.get(url)
 
-    soup = bs4.BeautifulSoup(res_obj.text, 'lxml')
+    try:
+        soup = bs4.BeautifulSoup(res_obj.text, 'lxml')
+    except bs4.FeatureNotFound:
+        soup = bs4.BeautifulSoup(res_obj.text, 'html.parser')
 
     elements = soup.find("div", {"id": "searchResultsRows"})
     skin_urls = elements.find_all('a', {'class': 'market_listing_row_link'})
@@ -71,7 +80,7 @@ while True:
     skin_names = elements.find_all('span', {'class': 'market_listing_item_name'})
     skin_prices = elements.find_all('span', {'class': 'normal_price'})
 
-    if searches == 0: best_option = []
+    if searches == 0: best_option = {}
 
     for i in range(len(skin_urls)):
         link = skin_urls[i]['href']
@@ -82,24 +91,35 @@ while True:
         print(f'Skin: \033[36m{skin}\033[m')
         print(f'Price: \033[31m{price}\033[m')
 
-        if i == 0 and searches == 0: best_option = [link, skin, price]
-        elif float(price[1:]) < float(best_option[2][1:]): 
-            best_option = [link, skin, price]
+        if i == 0 and searches == 0: best_option = {
+            'link': link,
+            'skin': skin,
+            'price': price
+        }
 
+        elif float(price[1:]) < float(best_option["price"][1:]): 
+            best_option = {
+                'link': link,
+                'skin': skin,
+                'price': price
+            }
 
+    if float(best_option['price'][1:]) <= notification_price:
+        toaster.show_toast(best_option['skin'], best_option['price'])
+        break;
 
     with open(f'price_log/best_price_{"_".join(skin_name.split())}.txt', 'wt') as file:
-        file.write(f'Link: {best_option[0]}\n')
-        file.write(f'Skin: {best_option[1]}\n')
-        file.write(f'Price: {best_option[2]}\n')
+        file.write(f'Link: {best_option["link"]}\n')
+        file.write(f'Skin: {best_option["skin"]}\n')
+        file.write(f'Price: {best_option["price"]}\n')
 
     searches += 1
 
     print()
     print('Best option:')
-    print(f'Link: {best_option[0]}')
-    print(f'Skin: {best_option[1]}')
-    print(f'Price: \033[32m{best_option[2]}\033[m')
+    print(f'Link: {best_option["link"]}')
+    print(f'Skin: {best_option["skin"]}')
+    print(f'Price: \033[32m{best_option["price"]}\033[m')
 
 print()
-print('Script terminated')
+print('Script terminated', end='')

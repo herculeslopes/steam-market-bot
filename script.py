@@ -14,7 +14,7 @@ print()
 
 print(f''' Quality preferences:
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-| No preference:  | 0 |
+| Não preference:  | 0 |
 | Battle-Scared:  | 1 |
 | Well-Worn:      | 2 |
 | Field-Tested:   | 3 |
